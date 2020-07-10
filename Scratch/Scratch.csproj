@@ -5,4 +5,13 @@
         <TargetFramework>netcoreapp3.1</TargetFramework>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="dnlib" Version="3.3.2" />
+      <PackageReference Include="Optional" Version="4.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\SampleTestProject\SampleTestProject.csproj" />
+    </ItemGroup>
+
 </Project>
