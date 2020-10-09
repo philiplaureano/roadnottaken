@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using dnlib.DotNet;
 
 namespace Skipper.Core
@@ -8,7 +9,8 @@ namespace Skipper.Core
         public static void AddSkips(string assemblyLocation, string outputFile, string skipReason,
             Func<string, string, string, bool> testFilter)
         {
-            var assemblyDef = AssemblyDef.Load(assemblyLocation);
+            var bytes = File.ReadAllBytes(assemblyLocation);
+            var assemblyDef = AssemblyDef.Load(bytes);
             SkipWeaver.InsertSkips(assemblyDef, skipReason, testFilter);
 
             assemblyDef.Write(outputFile);
