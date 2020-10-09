@@ -7,7 +7,6 @@ using dnlib.DotNet;
 using Optional.Collections;
 using Optional.Unsafe;
 using Serilog;
-using Xunit;
 
 namespace Skipper
 {
@@ -69,8 +68,8 @@ namespace Skipper
                     // Search for the [Fact] or [Theory] attributes
                     var factOrTheoryAttribute =
                         customAttributes.FirstOrNone(c =>
-                            c?.AttributeType.Name == nameof(FactAttribute) ||
-                            c?.AttributeType.Name == nameof(TheoryAttribute));
+                            c?.AttributeType.Name == "FactAttribute" ||
+                            c?.AttributeType.Name == "TheoryAttribute");
 
                     if (!factOrTheoryAttribute.HasValue)
                     {
