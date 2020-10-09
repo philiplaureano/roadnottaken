@@ -4,14 +4,15 @@ using Xunit;
 
 namespace SampleTestProject
 {
-    public class UnitTest1
+    public class SampleTests
     {
         [Fact]
         public void Test1()
         {
+            throw new NotImplementedException("TODO: Implement Test1");
         }
-
-        [Fact(Skip = "This test has been skipped")]
+        
+        [Fact]
         public async Task Test2()
         {
             throw new NotImplementedException("TODO: Implement Test2");
