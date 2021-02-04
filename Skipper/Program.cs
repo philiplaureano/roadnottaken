@@ -35,23 +35,52 @@ namespace Skipper
                     Log.Information($"Skip File Path = {skipFilePath}");
                     Log.Information($"Skip Reason = '{skipReason}'");
 
-                    var skipFileLines = File.ReadAllLines(skipFilePath);
-                    var skipFileEntries = new HashSet<string>(skipFileLines);
+                    var includeFilePath = options.IncludeListFilePath;
+                    if (!File.Exists(includeFilePath))
+                    {
+                        var skipFileLines = File.ReadAllLines(skipFilePath);
+                        var skipFileEntries = new HashSet<string>(skipFileLines);
 
-                    Log.Debug($"{skipFileEntries.Count} Skip File Lines Loaded");
+                        Log.Debug($"{skipFileEntries.Count} Skip File Lines Loaded");
 
-                    bool ShouldSkipUnitTest(string assemblyName, string typeName, string methodName)
+                        bool ShouldSkipUnitTest(string assemblyName, string typeName, string methodName)
+                        {
+                            var combinedMethodName = $"{typeName}.{methodName}";
+
+                            // Match either the combined method name or just the method name
+                            return skipFileEntries.Contains(combinedMethodName) || skipFileEntries.Contains(methodName)
+                                || skipFileEntries.Any(entry =>
+                                    entry.EndsWith(methodName));
+                        }
+
+                        Log.Information($"Reading unit test assembly file '{assemblyLocation}'");
+                        Skipper.Core.Skipper.AddSkips(assemblyLocation, outputFile, skipReason, ShouldSkipUnitTest);
+                        return;
+                    }
+
+                    var includeFileLines = File.ReadAllLines(includeFilePath);
+                    var inclusionEntries = new HashSet<string>(includeFileLines);
+                    Log.Debug($"{inclusionEntries.Count} Inclusion Entry Lines Loaded");
+
+                    bool ShouldBeExcluded(string assemblyName, string typeName, string methodName)
                     {
                         var combinedMethodName = $"{typeName}.{methodName}";
 
                         // Match either the combined method name or just the method name
-                        return skipFileEntries.Contains(combinedMethodName) || skipFileEntries.Contains(methodName)
-                                                                            || skipFileEntries.Any(entry =>
-                                                                                entry.EndsWith(methodName));
-                    }
+                        if (!inclusionEntries.Contains(combinedMethodName))
+                            return false;
 
+                        if (!inclusionEntries.Contains(methodName))
+                            return false;
+
+                        if (!inclusionEntries.Any(entry => entry.EndsWith(methodName)))
+                            return false;
+
+                        return true;
+                    }
+                    
                     Log.Information($"Reading unit test assembly file '{assemblyLocation}'");
-                    Skipper.Core.Skipper.AddSkips(assemblyLocation, outputFile, skipReason, ShouldSkipUnitTest);
+                    Skipper.Core.Skipper.AddSkips(assemblyLocation, outputFile, skipReason, ShouldBeExcluded);
                 });
         }
     }
