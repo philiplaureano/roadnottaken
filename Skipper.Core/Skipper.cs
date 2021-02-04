@@ -7,7 +7,7 @@ namespace Skipper.Core
     public class Skipper
     {
         public static void AddSkips(string assemblyLocation, string outputFile, string skipReason,
-            Func<string, string, string, bool> testFilter)
+            Func<string, string, string, string, bool> testFilter)
         {
             var bytes = File.ReadAllBytes(assemblyLocation);
             var assemblyDef = AssemblyDef.Load(bytes);

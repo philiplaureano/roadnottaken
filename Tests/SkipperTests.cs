@@ -19,15 +19,15 @@ namespace Tests
         {
             var testsToSkip = new[] {"Test1", "Test2", "Test3"};
 
-            TestSkipper(testsToSkip,"FactAttribute");
+            TestSkipper(testsToSkip, "FactAttribute");
         }
 
-        [Fact(DisplayName = @"The skipper should modify a unit test with the FactAttribute so that it is ignored")]
+        [Fact(DisplayName = @"The skipper should modify a unit test with the TheoryAttribute so that it is ignored")]
         public async Task ShouldSkipTestsWithTheoryAttribute()
         {
             var testsToSkip = new[] {"Test6"};
 
-            TestSkipper(testsToSkip,"TheoryAttribute");
+            TestSkipper(testsToSkip, "TheoryAttribute");
         }
 
         private static void TestSkipper(string[] testsToSkip, string attributeTypeName)
@@ -35,7 +35,7 @@ namespace Tests
             var targetAssemblyPath = typeof(SampleTests).Assembly.Location;
             var assemblyDef = AssemblyDef.Load(targetAssemblyPath);
 
-            Func<string, string, string, bool> testFilter = (assemblyName, typeName, methodName) =>
+            Func<string, string, string, string, bool> testFilter = (assemblyName, typeName, methodName, fullyQualifiedMethodName) =>
                 testsToSkip.Contains(methodName);
 
             SkipWeaver.InsertSkips(assemblyDef, "This is a test", testFilter);

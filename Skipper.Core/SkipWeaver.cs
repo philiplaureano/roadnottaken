@@ -11,7 +11,7 @@ namespace Skipper.Core
     public class SkipWeaver
     {
         public static void InsertSkips(AssemblyDef assemblyDef, string skipReason,
-            Func<string, string, string, bool> testFilter)
+            Func<string, string, string, string, bool> testFilter)
         {
             var module = assemblyDef.Modules.First();
             var types = module.Types.ToArray();
@@ -19,9 +19,10 @@ namespace Skipper.Core
             var modifiedMethods = new List<MethodDef>();
             var methodsNotModified = new List<MethodDef>();
             var methodsAlreadySkipped = new List<MethodDef>();
-            
+
             var methodsWithCustomAttributes =
                 types.SelectMany(t => t.Methods).Where(m => m.HasCustomAttributes).ToArray();
+
             foreach (var method in methodsWithCustomAttributes)
             {
                 if (!method.HasCustomAttributes)
@@ -39,7 +40,7 @@ namespace Skipper.Core
                 {
                     Log.Verbose(
                         $"Ignoring method '{method.FullName}' since it does not appear to be an xUnit test case");
-                    
+
                     methodsNotModified.Add(method);
                     continue;
                 }
@@ -51,7 +52,7 @@ namespace Skipper.Core
                 {
                     Log.Warning(
                         $"The test method '{method.FullName}' is already being skipped and won't be modified.");
-                    
+
                     methodsAlreadySkipped.Add(method);
                     continue;
                 }
@@ -61,11 +62,11 @@ namespace Skipper.Core
                 var typeName = declaringType.Name;
                 var methodName = method.Name;
 
-                if (!testFilter(assemblyName, typeName, methodName))
+                if (!testFilter(assemblyName, typeName, methodName, method.FullName))
                 {
                     Log.Warning(
                         $"The test method '{method.FullName}' has not been marked for skipping and won't be modified.");
-                    
+
                     methodsNotModified.Add(method);
                     continue;
                 }
@@ -73,10 +74,10 @@ namespace Skipper.Core
                 targetAttribute.NamedArguments.Add(new CANamedArgument(false, module.CorLibTypes.String, "Skip",
                     new CAArgument(module.CorLibTypes.String,
                         skipReason)));
-                
+
                 modifiedMethods.Add(method);
             }
-            
+
             Log.Information($"Methods Modified: {modifiedMethods.Count}");
             Log.Information($"Methods Already Skipped: {methodsAlreadySkipped.Count}");
             Log.Information($"Methods Not Modified: {methodsNotModified.Count}");
